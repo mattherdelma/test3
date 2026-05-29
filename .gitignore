@@ -1,0 +1,9 @@
+# Host test binary
+test/test_protocol
+*.o
+*.hex
+*.elf
+
+# Python
+__pycache__/
+*.pyc
