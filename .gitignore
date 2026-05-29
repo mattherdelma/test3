@@ -1,0 +1,16 @@
+# Build output
+build/
+out/
+cmake-build-*/
+
+# Model artifacts
+*.onnx
+*.engine
+*.plan
+*.cache
+
+# Editor / OS
+.vscode/
+.idea/
+*.user
+.DS_Store
