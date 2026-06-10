@@ -14,7 +14,38 @@ TargetSelector ──(选中目标)──> KalmanTracker ──(predictAhead)─
 AdaptivePID ──(原始增量)──> TrajectoryPlanner ──(平滑增量)──> 云台指令
 ```
 
-## 构建与运行
+代码为可移植的标准 C++17，**同时支持 Windows 10 / Visual Studio 2019(MSVC)
+与 Linux/macOS(GCC/Clang)**，无任何第三方依赖。
+
+## 在 Windows 10 / VS2019 上构建运行
+
+提供了开箱即用的解决方案,无需 CMake：
+
+1. 用 VS2019 打开 `vs2019\PtzServoControl.sln`。
+2. 解决方案平台选择 **x64**(Debug 或 Release 均可)。
+3. 生成解决方案(Ctrl+Shift+B)。两个工程会编译为控制台程序：
+   - **ptz_demo** — 闭环仿真(目标横扫 + 中途反向 + 诱饵目标出现)。
+   - **ptz_tests** — 单元/sanity 测试,全部通过时进程返回 0。
+4. 将 `ptz_tests` 设为启动项目并运行(Ctrl+F5)即可看到测试结果；
+   `ptz_demo` 同理查看逐帧控制行为。
+
+工程要点：工具集 `v142`、语言标准 `/std:c++17`、`/permissive-`、警告级别 `/W4`，
+附加包含目录指向 `..\include`。每个工程都独立编译全部 `src\*.cpp`,因此**不存在
+跨工程链接配置**,最稳定。
+
+> 也可用 VS2019 的 “打开本地文件夹” 直接加载本仓库,VS 内置 CMake 会自动识别根目录的
+> `CMakeLists.txt` 完成配置。
+
+### 命令行(VS2019 Developer Command Prompt)
+
+```bat
+cmake -B build -S . -G "Visual Studio 16 2019" -A x64
+cmake --build build --config Release
+build\Release\ptz_tests.exe
+build\Release\ptz_demo.exe
+```
+
+## 在 Linux / macOS 上构建运行
 
 ```bash
 cmake -B build -S .
@@ -88,4 +119,6 @@ include/ptz/   matrix.hpp  kalman_tracker.hpp  adaptive_pid.hpp
 src/           对应 .cpp 实现
 examples/      demo.cpp     闭环仿真
 tests/         test_control.cpp   14 项 sanity 测试
+vs2019/        PtzServoControl.sln  ptz_demo.vcxproj  ptz_tests.vcxproj
+               VS2019 解决方案(x64, v142, /std:c++17)
 ```

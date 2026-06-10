@@ -1,3 +1,13 @@
 build/
 *.o
 *.a
+
+# Visual Studio
+.vs/
+x64/
+Debug/
+Release/
+*.user
+*.suo
+*.sdf
+ipch/

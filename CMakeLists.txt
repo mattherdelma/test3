@@ -4,11 +4,17 @@ project(ptz_servo_control CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if(NOT CMAKE_BUILD_TYPE)
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-add_compile_options(-Wall -Wextra)
+# Compiler-specific options: MSVC (VS2019) uses /W4, others use -Wall -Wextra.
+if(MSVC)
+  add_compile_options(/W4 /permissive-)
+  add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+else()
+  add_compile_options(-Wall -Wextra)
+endif()
 
 add_library(ptz_control
   src/kalman_tracker.cpp
