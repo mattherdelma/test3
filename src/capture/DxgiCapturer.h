@@ -24,6 +24,15 @@
 #include <functional>
 
 #if defined(_WIN32)
+// Keep <windows.h> from dragging in the whole Win32 surface and, critically,
+// from defining the min/max macros that collide with std::min/std::max and
+// Eigen. These must be defined before any Windows header is included.
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <d3d11.h>
 #include <dxgi1_2.h>
 #include <wrl/client.h>          // Microsoft::WRL::ComPtr (RAII for COM)

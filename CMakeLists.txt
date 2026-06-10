@@ -4,15 +4,30 @@ project(rtpercept LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if(NOT CMAKE_BUILD_TYPE)
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_BUILD_TYPE Release)
+endif()
+
+# ---------------------------------------------------------------------------
+# MSVC (Visual Studio 2019, toolset v142) compatibility.
+#   /MP            parallel compilation
+#   /permissive-   stricter, conformant C++
+#   /EHsc          standard C++ exception model
+#   NOMINMAX       stop <windows.h> from defining min/max macros
+#   WIN32_LEAN_AND_MEAN / _CRT_SECURE_NO_WARNINGS  reduce header bloat / noise
+#   UNICODE        DXGI/D3D11 paths expect the wide-char Win32 API
+# ---------------------------------------------------------------------------
+if(MSVC)
+  add_compile_options(/MP /permissive- /EHsc /W3 /std:c++17 /Zc:__cplusplus)
+  add_compile_definitions(
+      NOMINMAX WIN32_LEAN_AND_MEAN _CRT_SECURE_NO_WARNINGS UNICODE _UNICODE)
 endif()
 
 find_package(Eigen3 REQUIRED)
 
 # ---------------------------------------------------------------------------
 # Tracking library: pure C++ + Eigen, no CUDA/TensorRT. Always buildable, and
-# the unit tests link only against this so they run on any platform.
+# the unit tests link only against this so they run on any platform / VS2019.
 # ---------------------------------------------------------------------------
 add_library(rtpercept_tracking STATIC
     src/tracking/KalmanFilter.cpp
@@ -25,9 +40,17 @@ target_include_directories(rtpercept_tracking PUBLIC
 target_link_libraries(rtpercept_tracking PUBLIC Eigen3::Eigen)
 
 enable_testing()
+
+# Portable tests (run anywhere, including a plain VS2019 build with no CUDA).
 add_executable(test_tracking tests/test_tracking.cpp)
 target_link_libraries(test_tracking PRIVATE rtpercept_tracking)
 add_test(NAME tracking COMMAND test_tracking)
+
+add_executable(test_spsc_queue tests/test_spsc_queue.cpp)
+target_include_directories(test_spsc_queue PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+find_package(Threads REQUIRED)
+target_link_libraries(test_spsc_queue PRIVATE Threads::Threads)
+add_test(NAME spsc_queue COMMAND test_spsc_queue)
 
 # ---------------------------------------------------------------------------
 # Full perception pipeline (CUDA + TensorRT, plus DXGI capture on Windows).
@@ -71,4 +94,11 @@ if(BUILD_PIPELINE)
 
   add_executable(rtpercept src/app/main.cpp)
   target_link_libraries(rtpercept PRIVATE rtpercept_core)
+
+  # DXGI capture smoke test (Windows only).
+  if(WIN32)
+    add_executable(test_capture tests/test_capture.cpp)
+    target_link_libraries(test_capture PRIVATE rtpercept_core)
+    add_test(NAME capture COMMAND test_capture)
+  endif()
 endif()

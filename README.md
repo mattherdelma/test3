@@ -36,12 +36,36 @@ content analysis on Windows.
 
 ## Build
 
-Requires: CUDA 12.x, TensorRT 8.6/10.x, Eigen3, and the Windows SDK (D3D11/DXGI).
+### Windows 10 + Visual Studio 2019 (target platform)
+
+See **[docs/VS2019.md](docs/VS2019.md)** for the full walkthrough. In short:
+
+- **Tests only (no CUDA):** open `vs2019\RTPercept.sln` → Release|x64 → build.
+  Builds the tracking library and the portable unit tests; only needs Eigen.
+- **Full pipeline (CUDA + TensorRT + DXGI):**
+  ```bat
+  set TENSORRT_ROOT=C:\TensorRT-10.x
+  set EIGEN3_INCLUDE_DIR=C:\libs\eigen-3.4.0
+  scripts\generate_vs2019.bat pipeline
+  cmake --build build\vs2019-pipeline --config Release
+  ```
+  Produces `rtpercept.exe`. Toolset v142, C++17, x64, CUDA arch sm_89.
+
+### Cross-platform (CMake, for the tracking/queue tests)
 
 ```bash
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --config Release
+cmake -B build -DCMAKE_BUILD_TYPE=Release      # add -DBUILD_PIPELINE=ON for CUDA
+cmake --build build -j
+ctest --test-dir build --output-on-failure
 ```
+
+## Tests
+
+| Test | What it checks | Platform |
+|------|----------------|----------|
+| `test_tracking`   | lapjv assignment, Kalman convergence, stable track IDs, occlusion recovery | any |
+| `test_spsc_queue` | FIFO + full/empty edges, 1M-item single-producer/consumer stress | any |
+| `test_capture`    | DXGI duplication smoke test: frame validity, size, capture rate | Windows + GPU |
 
 ## Export a YOLOv8 engine
 

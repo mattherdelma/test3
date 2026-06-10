@@ -59,8 +59,12 @@ void DxgiCapturer::initialize(uint32_t adapter_index, uint32_t output_index) {
     throwIfFailed(output1->DuplicateOutput(device_.Get(), &duplication_),
                   "DuplicateOutput");
 
-    // Tell CUDA which D3D11 device to interop with (must precede registration).
-    cudaD3D11SetDirect3DDevice(device_.Get());
+    // Bind CUDA to the SAME GPU the D3D11 device lives on, otherwise resource
+    // registration fails. This replaces the deprecated cudaD3D11SetDirect3DDevice.
+    int cuda_device = 0;
+    if (cudaD3D11GetDevice(&cuda_device, adapter.Get()) == cudaSuccess) {
+        CUDA_CHECK(cudaSetDevice(cuda_device));
+    }
 
     createPool();
 }

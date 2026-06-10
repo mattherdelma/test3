@@ -9,6 +9,7 @@
 
 #include <cmath>
 #include <cstdio>
+#include <tuple>
 #include <vector>
 
 namespace {

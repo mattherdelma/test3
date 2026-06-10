@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Shared properties for the VS2019 projects.
+
+  Eigen is header-only. Point EigenIncludeDir at your Eigen checkout. Resolution
+  order:
+    1. The EIGEN3_INCLUDE_DIR environment variable (recommended), e.g.
+         setx EIGEN3_INCLUDE_DIR C:\libs\eigen-3.4.0
+    2. A vcpkg install at the default location (if you used `vcpkg install eigen3`).
+    3. A vendored copy under third_party\eigen.
+  Override on the MSBuild command line with /p:EigenIncludeDir=... if needed.
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <EigenIncludeDir Condition="'$(EigenIncludeDir)'=='' AND '$(EIGEN3_INCLUDE_DIR)'!=''">$(EIGEN3_INCLUDE_DIR)</EigenIncludeDir>
+    <EigenIncludeDir Condition="'$(EigenIncludeDir)'=='' AND Exists('$(VCPKG_ROOT)\installed\x64-windows\include\eigen3')">$(VCPKG_ROOT)\installed\x64-windows\include\eigen3</EigenIncludeDir>
+    <EigenIncludeDir Condition="'$(EigenIncludeDir)'=='' AND Exists('$(ProjectDir)..\third_party\eigen')">$(ProjectDir)..\third_party\eigen</EigenIncludeDir>
+  </PropertyGroup>
+</Project>

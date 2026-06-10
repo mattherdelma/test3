@@ -1,0 +1,37 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 21, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "vs2019",
+      "displayName": "VS2019 x64 (tests only, no CUDA)",
+      "description": "Generates rtpercept.sln for Visual Studio 2019. Builds the tracking library and the portable unit tests. No CUDA/TensorRT required.",
+      "generator": "Visual Studio 16 2019",
+      "architecture": { "value": "x64", "strategy": "set" },
+      "binaryDir": "${sourceDir}/build/vs2019",
+      "cacheVariables": {
+        "BUILD_PIPELINE": "OFF"
+      }
+    },
+    {
+      "name": "vs2019-pipeline",
+      "displayName": "VS2019 x64 (full CUDA/TensorRT/DXGI pipeline)",
+      "description": "Full perception pipeline. Requires the CUDA Toolkit (with VS2019 integration) and TENSORRT_ROOT pointing at your TensorRT install.",
+      "inherits": "vs2019",
+      "binaryDir": "${sourceDir}/build/vs2019-pipeline",
+      "cacheVariables": {
+        "BUILD_PIPELINE": "ON",
+        "TENSORRT_ROOT": "$env{TENSORRT_ROOT}"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "vs2019-debug",   "configurePreset": "vs2019",          "configuration": "Debug" },
+    { "name": "vs2019-release", "configurePreset": "vs2019",          "configuration": "Release" },
+    { "name": "pipeline-release","configurePreset": "vs2019-pipeline","configuration": "Release" }
+  ],
+  "testPresets": [
+    { "name": "vs2019-tests", "configurePreset": "vs2019", "configuration": "Release",
+      "output": { "outputOnFailure": true } }
+  ]
+}

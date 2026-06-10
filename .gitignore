@@ -9,8 +9,18 @@ cmake-build-*/
 *.plan
 *.cache
 
+# Visual Studio build artifacts
+.vs/
+*.user
+*.vcxproj.user
+vs2019/x64/
+vs2019/Debug/
+vs2019/Release/
+[Dd]ebug/
+[Rr]elease/
+x64/
+
 # Editor / OS
 .vscode/
 .idea/
-*.user
 .DS_Store
